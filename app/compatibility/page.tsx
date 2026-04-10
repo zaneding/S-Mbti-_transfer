@@ -33,12 +33,17 @@ function CompatibilityContent() {
     setResult({ score, level: getScoreLevel(score) })
   }
 
-  // Auto-compute if both params present on mount
+  // mount-only: intentionally reads initial URL params once
   useEffect(() => {
     const a = searchParams.get('a') ?? ''
     const b = searchParams.get('b') ?? ''
-    if (a && b) compute(a, b)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!a || !b) return
+    const score = getScore(a, b)
+    if (score === null) {
+      setNoData(true)
+      return
+    }
+    setResult({ score, level: getScoreLevel(score) })
   }, [])
 
   function handleCompute() {

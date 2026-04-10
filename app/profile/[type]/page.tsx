@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getSbtiType, sbtiTypes } from '@/data/sbti-types'
-import ProfileCard from '@/components/ProfileCard'
+import ProfileCard, { type ProfileInfo } from '@/components/ProfileCard'
 import sbtiInfo from '@/data/sbtiInfo.json'
 
 interface PageProps {
@@ -20,8 +20,7 @@ export default async function ProfilePage({ params }: PageProps) {
     notFound()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const info = (sbtiInfo as Record<string, any>)[sbtiType.code]
+  const info = (sbtiInfo as unknown as Record<string, ProfileInfo | undefined>)[sbtiType.code]
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-10 flex flex-col items-center gap-6">

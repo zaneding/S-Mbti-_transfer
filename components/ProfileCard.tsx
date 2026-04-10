@@ -1,6 +1,6 @@
 import type { SbtiType } from '@/data/sbti-types'
 
-interface ProfileInfo {
+export interface ProfileInfo {
   description: string
   traits: string[]
   strengths: string[]
