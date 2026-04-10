@@ -2,90 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
+/* ── Custom animation keyframes ── */
 
-html,
-body {
-  background-color: #0d0d18;
-  color: #ffffff;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0d0d18;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Gradient text utility */
-.gradient-text {
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Glow orb animation */
-@keyframes orb-drift {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -20px) scale(1.05);
-  }
-  66% {
-    transform: translate(-20px, 10px) scale(0.95);
-  }
-}
-
-.animate-orb {
-  animation: orb-drift 12s ease-in-out infinite;
-}
-
-.animate-orb-slow {
-  animation: orb-drift 18s ease-in-out infinite reverse;
-}
-
-/* Card hover shimmer */
-@keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-/* Score ring fill animation */
-@keyframes ring-fill {
-  from {
-    stroke-dashoffset: 340;
-  }
-}
-
-.animate-ring-fill {
-  animation: ring-fill 1s ease-out forwards;
-}
-
-/* Fade up animation */
-@keyframes fade-up {
+@keyframes fade-slide-up {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -93,22 +15,29 @@ html {
   }
 }
 
-.animate-fade-up {
-  animation: fade-up 0.5s ease-out forwards;
-}
-
-/* Pulse dot */
-@keyframes pulse-dot {
-  0%, 100% {
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
     opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.85);
+    transform: translateY(0) scale(1);
   }
 }
 
-.animate-pulse-dot {
-  animation: pulse-dot 1.5s ease-in-out infinite;
+/* ── Section enter animation ── */
+.section-animate-in {
+  animation: fade-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Individual type card stagger animation ── */
+.type-card-animate {
+  opacity: 0;
+  animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Smooth scroll behavior ── */
+html {
+  scroll-behavior: smooth;
 }

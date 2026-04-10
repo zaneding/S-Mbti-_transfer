@@ -1,181 +1,476 @@
-import Link from 'next/link'
-import { sbtiTypes } from '@/data/sbti-types'
-import { getCategoryColors } from '@/lib/category-colors'
+'use client'
 
-const GROUPS = [
-  { name: '控制', emoji: '⚡', desc: '掌控全局，目标明确，雷厉风行' },
-  { name: '理性', emoji: '🧠', desc: '逻辑驱动，独立思考，洞察本质' },
-  { name: '情感', emoji: '💖', desc: '情感细腻，重视关系，全情投入' },
-  { name: '社交', emoji: '🎭', desc: '活力四射，魅力天生，制造气场' },
-  { name: '状态', emoji: '🌊', desc: '独特的处世哲学与生活方式' },
-  { name: '补充', emoji: '✨', desc: '多元个性，各有风采' },
+import { useState, useRef } from 'react'
+import Link from 'next/link'
+import { sbtiTypes, type SbtiType } from '@/data/sbti-types'
+import sbtiInfoRaw from '@/data/sbtiInfo.json'
+import type { ProfileInfo } from '@/components/ProfileCard'
+
+const sbtiInfo = sbtiInfoRaw as unknown as Record<string, ProfileInfo | undefined>
+
+type CategoryConfig = {
+  name: string
+  emoji: string
+  desc: string
+  bg: string
+  activeBg: string
+  border: string
+  activeBorder: string
+  glow: string
+  badge: string
+  badgeBorder: string
+  accent: string
+  dot: string
+}
+
+const CATEGORIES: CategoryConfig[] = [
+  {
+    name: '控制',
+    emoji: '👑',
+    desc: '掌控全局，强势主导',
+    bg: 'from-red-500/10 to-orange-500/10',
+    activeBg: 'from-red-500/20 to-orange-500/20',
+    border: 'border-red-500/30',
+    activeBorder: 'border-red-400/70',
+    glow: 'hover:shadow-red-500/20',
+    badge: 'bg-red-500/20 text-red-300',
+    badgeBorder: 'border-red-500/40',
+    accent: 'text-red-400',
+    dot: 'bg-red-400',
+  },
+  {
+    name: '理性',
+    emoji: '🧠',
+    desc: '冷静分析，洞察本质',
+    bg: 'from-blue-500/10 to-cyan-500/10',
+    activeBg: 'from-blue-500/20 to-cyan-500/20',
+    border: 'border-blue-500/30',
+    activeBorder: 'border-blue-400/70',
+    glow: 'hover:shadow-blue-500/20',
+    badge: 'bg-blue-500/20 text-blue-300',
+    badgeBorder: 'border-blue-500/40',
+    accent: 'text-blue-400',
+    dot: 'bg-blue-400',
+  },
+  {
+    name: '情感',
+    emoji: '💝',
+    desc: '感知细腻，爱意深重',
+    bg: 'from-pink-500/10 to-rose-500/10',
+    activeBg: 'from-pink-500/20 to-rose-500/20',
+    border: 'border-pink-500/30',
+    activeBorder: 'border-pink-400/70',
+    glow: 'hover:shadow-pink-500/20',
+    badge: 'bg-pink-500/20 text-pink-300',
+    badgeBorder: 'border-pink-500/40',
+    accent: 'text-pink-400',
+    dot: 'bg-pink-400',
+  },
+  {
+    name: '社交',
+    emoji: '🎭',
+    desc: '魅力四射，气场全开',
+    bg: 'from-purple-500/10 to-violet-500/10',
+    activeBg: 'from-purple-500/20 to-violet-500/20',
+    border: 'border-purple-500/30',
+    activeBorder: 'border-purple-400/70',
+    glow: 'hover:shadow-purple-500/20',
+    badge: 'bg-purple-500/20 text-purple-300',
+    badgeBorder: 'border-purple-500/40',
+    accent: 'text-purple-400',
+    dot: 'bg-purple-400',
+  },
+  {
+    name: '状态',
+    emoji: '🌊',
+    desc: '情绪多变，内心细腻',
+    bg: 'from-teal-500/10 to-emerald-500/10',
+    activeBg: 'from-teal-500/20 to-emerald-500/20',
+    border: 'border-teal-500/30',
+    activeBorder: 'border-teal-400/70',
+    glow: 'hover:shadow-teal-500/20',
+    badge: 'bg-teal-500/20 text-teal-300',
+    badgeBorder: 'border-teal-500/40',
+    accent: 'text-teal-400',
+    dot: 'bg-teal-400',
+  },
+  {
+    name: '补充',
+    emoji: '⭐',
+    desc: '特立独行，自成一派',
+    bg: 'from-amber-500/10 to-yellow-500/10',
+    activeBg: 'from-amber-500/20 to-yellow-500/20',
+    border: 'border-amber-500/30',
+    activeBorder: 'border-amber-400/70',
+    glow: 'hover:shadow-amber-500/20',
+    badge: 'bg-amber-500/20 text-amber-300',
+    badgeBorder: 'border-amber-500/40',
+    accent: 'text-amber-400',
+    dot: 'bg-amber-400',
+  },
 ]
 
 export default function Home() {
-  const typesByCategory = sbtiTypes.reduce(
-    (acc, t) => {
-      if (!acc[t.category]) acc[t.category] = []
-      acc[t.category].push(t)
-      return acc
-    },
-    {} as Record<string, typeof sbtiTypes>
-  )
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedType, setSelectedType] = useState<SbtiType | null>(null)
+  const typesRef = useRef<HTMLDivElement>(null)
+  const profileRef = useRef<HTMLDivElement>(null)
+
+  const catConfig = selectedCategory
+    ? CATEGORIES.find((c) => c.name === selectedCategory) ?? null
+    : null
+
+  const typesInCategory = selectedCategory
+    ? sbtiTypes.filter((t) => t.category === selectedCategory)
+    : []
+
+  function handleCategoryClick(catName: string) {
+    if (selectedCategory === catName) {
+      setSelectedCategory(null)
+      setSelectedType(null)
+      return
+    }
+    setSelectedCategory(catName)
+    setSelectedType(null)
+    setTimeout(() => {
+      typesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 80)
+  }
+
+  function handleTypeClick(type: SbtiType) {
+    setSelectedType(type)
+    setTimeout(() => {
+      profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
+
+  const info = selectedType ? sbtiInfo[selectedType.code] : null
 
   return (
-    <main className="min-h-screen" style={{ background: '#0d0d18' }}>
-      {/* Background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div
-          className="animate-orb absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)' }}
-        />
-        <div
-          className="animate-orb-slow absolute top-1/3 -right-40 w-[400px] h-[400px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%)' }}
-        />
-        <div
-          className="animate-orb absolute bottom-0 left-1/3 w-[500px] h-[300px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)' }}
-        />
+    <main className="min-h-screen bg-[#060810] text-white overflow-x-hidden">
+      {/* Ambient background blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 left-1/3 w-[700px] h-[700px] rounded-full bg-indigo-600/5 blur-[120px]" />
+        <div className="absolute top-1/2 -right-32 w-[500px] h-[500px] rounded-full bg-purple-600/5 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-teal-600/4 blur-[100px]" />
       </div>
 
-      {/* Hero */}
-      <section className="relative z-10 px-6 pt-24 pb-20 text-center">
-        <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }}>
-            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse-dot" />
-            <span className="text-white/50">28 种人格类型 · 5 大维度 · 情侣匹配度</span>
+      <div className="relative z-10 max-w-5xl mx-auto px-5 py-20 flex flex-col gap-20">
+        {/* ── Hero ── */}
+        <section className="text-center flex flex-col items-center gap-7">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm text-gray-400 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            28种人格类型 · MBTI对照 · 情侣匹配
           </div>
 
-          {/* Title */}
-          <h1 className="text-6xl sm:text-7xl font-black leading-tight tracking-tight">
-            <span style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              认识真实的
-            </span>
-            <br />
-            <span style={{
-              background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #fb7185 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              自己
+          <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none">
+            <span className="bg-gradient-to-br from-white via-white to-gray-400 bg-clip-text text-transparent">
+              SBTI
             </span>
           </h1>
-
-          {/* Sub */}
-          <p className="text-base sm:text-lg text-white/40 max-w-lg leading-relaxed">
-            SBTI 是基于真实社交观察的人格分类系统，比 MBTI 更接地气，帮你看清自己，也看懂他人。
+          <p className="text-xl md:text-2xl font-medium text-gray-300 -mt-3">
+            人格系统
           </p>
+          <p className="text-gray-500 text-base max-w-md leading-relaxed">
+            基于真实社交观察的人格分类体系，覆盖控制、理性、情感、社交、状态五大维度
+          </p>
+        </section>
 
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
-            <Link
-              href="/compatibility"
-              className="group inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105 hover:shadow-lg"
-              style={{
-                background: 'linear-gradient(135deg, #ec4899, #be185d)',
-                boxShadow: '0 0 30px rgba(236,72,153,0.3)',
-              }}
-            >
-              <span className="text-white">情侣匹配度测试</span>
-              <span className="text-white/70 group-hover:translate-x-0.5 transition-transform">→</span>
-            </Link>
-            <a
-              href="#types"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
-            >
-              浏览全部类型
-            </a>
+        {/* ── Category Selection ── */}
+        <section className="flex flex-col gap-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">选择你的 SBTI 类型</h2>
+            <p className="text-gray-500 text-sm">点击下方分类，展开该分类下的具体类型</p>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-8 mt-4 pt-6"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-            {[
-              { n: '28', label: '人格类型' },
-              { n: '5', label: '核心维度' },
-              { n: '756', label: '匹配组合' },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl font-black text-white">{s.n}</div>
-                <div className="text-xs text-white/30 mt-0.5">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Type Grid */}
-      <section id="types" className="relative z-10 px-4 sm:px-6 pb-24 max-w-6xl mx-auto">
-        {GROUPS.map((group) => {
-          const types = typesByCategory[group.name] ?? []
-          if (!types.length) return null
-          const colors = getCategoryColors(group.name)
-
-          return (
-            <div key={group.name} className="mb-14">
-              {/* Group header */}
-              <div className="flex items-center gap-3 mb-5 px-1">
-                <span className="text-2xl">{group.emoji}</span>
-                <div>
-                  <h2 className={`text-lg font-bold ${colors.text}`}>{group.name}</h2>
-                  <p className="text-xs text-white/30">{group.desc}</p>
-                </div>
-                <div
-                  className="ml-auto h-px flex-1 max-w-xs"
-                  style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.06), transparent)' }}
-                />
-              </div>
-
-              {/* Cards grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {types.map((t) => (
-                  <Link
-                    key={t.code}
-                    href={`/profile/${t.code}`}
-                    className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${colors.bg} ${colors.border}`}
-                    style={{ border: `1px solid`, borderColor: `color-mix(in srgb, currentColor 20%, transparent)` }}
-                  >
-                    <div className="relative z-10 flex flex-col gap-1.5">
-                      <span className={`text-xs font-mono font-bold tracking-widest ${colors.text}`}>
-                        {t.code}
-                      </span>
-                      <span className="text-white font-semibold text-sm leading-tight">{t.label}</span>
-                      <span className="text-white/35 text-xs leading-relaxed">{t.tagline}</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {CATEGORIES.map((cat) => {
+              const isActive = selectedCategory === cat.name
+              const count = sbtiTypes.filter((t) => t.category === cat.name).length
+              return (
+                <button
+                  key={cat.name}
+                  onClick={() => handleCategoryClick(cat.name)}
+                  className={[
+                    'group relative min-h-[160px] rounded-2xl p-6 text-left',
+                    'bg-gradient-to-br',
+                    isActive ? cat.activeBg : cat.bg,
+                    'border backdrop-blur-md',
+                    isActive ? cat.activeBorder : cat.border,
+                    'transition-all duration-300 ease-out cursor-pointer',
+                    'hover:scale-[1.03] hover:shadow-2xl',
+                    cat.glow,
+                    isActive ? 'scale-[1.02] shadow-xl' : '',
+                  ].join(' ')}
+                >
+                  <div className="flex flex-col gap-3 h-full">
+                    <div className="flex items-start justify-between">
+                      <span className="text-3xl select-none">{cat.emoji}</span>
                       <span
-                        className="text-xs mt-1 px-2 py-0.5 rounded-full w-fit"
-                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}
+                        className={[
+                          'text-xs font-medium px-2.5 py-1 rounded-full border',
+                          cat.badge,
+                          cat.badgeBorder,
+                        ].join(' ')}
                       >
-                        {t.mbti}
+                        {count} 种
                       </span>
                     </div>
-                    {/* Hover glow */}
-                    <div
-                      className={`absolute -bottom-4 -right-4 w-20 h-20 rounded-full blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-300 bg-gradient-to-br ${colors.gradient}`}
-                    />
-                    {/* Arrow */}
-                    <div className="absolute top-3 right-3 text-white/20 group-hover:text-white/50 transition-colors text-xs">
-                      →
+                    <div className="flex-1">
+                      <div
+                        className={`text-lg font-bold ${
+                          isActive ? 'text-white' : 'text-gray-200'
+                        }`}
+                      >
+                        {cat.name}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                        {cat.desc}
+                      </div>
                     </div>
-                  </Link>
-                ))}
+                    <div
+                      className={`text-xs font-medium flex items-center gap-1 transition-opacity duration-200 ${
+                        isActive ? `${cat.accent} opacity-100` : 'opacity-0 group-hover:opacity-60 text-gray-400'
+                      }`}
+                    >
+                      {isActive ? (
+                        <>展开中 <span className="text-base">↓</span></>
+                      ) : (
+                        <>点击查看</>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ── Types in Selected Category ── */}
+        {selectedCategory && catConfig && (
+          <section ref={typesRef} key={`types-${selectedCategory}`} className="section-animate-in flex flex-col gap-5">
+            <div className="flex items-center gap-3">
+              <span className={`w-2.5 h-2.5 rounded-full ${catConfig.dot} shadow-sm`} />
+              <h3 className="text-lg font-bold text-gray-100">
+                {selectedCategory} <span className="text-gray-500 font-normal">— 共 {typesInCategory.length} 种类型</span>
+              </h3>
+              {selectedType && (
+                <span className={`ml-auto text-xs ${catConfig.accent}`}>
+                  已选: {selectedType.label}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {typesInCategory.map((type, i) => {
+                const isSelected = selectedType?.code === type.code
+                return (
+                  <button
+                    key={type.code}
+                    onClick={() => handleTypeClick(type)}
+                    className="type-card-animate text-left"
+                    style={{ animationDelay: `${i * 55}ms` }}
+                  >
+                    <div
+                      className={[
+                        'rounded-xl p-4 border h-full',
+                        'transition-all duration-200 ease-out cursor-pointer',
+                        'hover:scale-[1.04]',
+                        isSelected
+                          ? `bg-gradient-to-br ${catConfig.activeBg} ${catConfig.activeBorder} shadow-lg`
+                          : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.07] hover:border-white/20',
+                      ].join(' ')}
+                    >
+                      <div
+                        className={`text-xs font-bold mb-1 font-mono ${
+                          isSelected ? catConfig.accent : 'text-gray-500'
+                        }`}
+                      >
+                        {type.code}
+                      </div>
+                      <div className="text-sm font-semibold text-white leading-tight">
+                        {type.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 leading-relaxed">
+                        {type.tagline}
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── Profile Detail ── */}
+        {selectedType && catConfig && (
+          <section
+            ref={profileRef}
+            key={`profile-${selectedType.code}`}
+            className="section-animate-in flex flex-col gap-4 scroll-mt-8"
+          >
+            {/* Banner */}
+            <div
+              className={[
+                'rounded-3xl overflow-hidden border',
+                catConfig.activeBorder,
+                'bg-gradient-to-br',
+                catConfig.activeBg,
+              ].join(' ')}
+            >
+              <div className="p-8 md:p-10 flex items-start justify-between flex-wrap gap-6">
+                <div>
+                  <div
+                    className={`text-5xl md:text-6xl font-black tracking-tight font-mono ${catConfig.accent}`}
+                  >
+                    {selectedType.code}
+                  </div>
+                  <div className="text-2xl md:text-3xl font-bold text-white mt-2">
+                    {selectedType.label}
+                  </div>
+                  <div className="text-gray-400 mt-1 text-base italic">
+                    {selectedType.tagline}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 items-end">
+                  <span
+                    className={[
+                      'text-xs font-semibold px-3 py-1 rounded-full border',
+                      catConfig.badge,
+                      catConfig.badgeBorder,
+                    ].join(' ')}
+                  >
+                    {selectedType.category}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    MBTI 对照：{selectedType.mbti}
+                  </span>
+                </div>
               </div>
             </div>
-          )
-        })}
-      </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center pb-12 text-white/20 text-xs">
-        SBTI · 基于真实社交观察的人格分类系统
-      </footer>
+            {/* Content cards */}
+            {info ? (
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Description */}
+                {info.description && info.description !== '内容即将更新' && (
+                  <div className="md:col-span-2 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      人格解读
+                    </div>
+                    <p className="text-gray-200 leading-relaxed text-base">
+                      {info.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Traits */}
+                {info.traits?.length > 0 && (
+                  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
+                      核心特质
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {info.traits.map((t, i) => (
+                        <span
+                          key={i}
+                          className={[
+                            'text-sm px-3 py-1.5 rounded-full border',
+                            catConfig.badge,
+                            catConfig.badgeBorder,
+                          ].join(' ')}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* In Relationships */}
+                {info.inRelationships && (
+                  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+                      💝 在关系中
+                    </div>
+                    <p className="text-gray-300 leading-relaxed text-sm">
+                      {info.inRelationships}
+                    </p>
+                  </div>
+                )}
+
+                {/* Strengths */}
+                {info.strengths?.length > 0 && (
+                  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
+                      ✨ 优势
+                    </div>
+                    <ul className="flex flex-col gap-2.5">
+                      {info.strengths.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Weaknesses */}
+                {info.weaknesses?.length > 0 && (
+                  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
+                      ⚡ 劣势
+                    </div>
+                    <ul className="flex flex-col gap-2.5">
+                      {info.weaknesses.map((w, i) => (
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0" />
+                          {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* CTA row */}
+                <div className="md:col-span-2 grid grid-cols-2 gap-3">
+                  <Link
+                    href={`/compatibility?a=${selectedType.code}`}
+                    className="text-center bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/40 hover:border-pink-400/70 text-pink-300 font-medium py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] text-sm"
+                  >
+                    💕 情侣匹配测试
+                  </Link>
+                  <Link
+                    href={`/profile/${selectedType.code}`}
+                    className="text-center bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 hover:border-white/25 text-gray-300 font-medium py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] text-sm"
+                  >
+                    查看完整详情 →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-10 text-center text-gray-500">
+                详细解读即将更新
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── Footer CTA ── */}
+        <footer className="border-t border-white/[0.08] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="font-semibold text-gray-200">情侣匹配度测试</div>
+            <div className="text-sm text-gray-500 mt-0.5">输入两个 SBTI 类型，立刻查看匹配分数与分析</div>
+          </div>
+          <Link
+            href="/compatibility"
+            className="bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/40 hover:border-pink-400/70 text-pink-300 font-medium px-6 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02] whitespace-nowrap text-sm"
+          >
+            💕 情侣匹配测试 →
+          </Link>
+        </footer>
+      </div>
     </main>
   )
 }
