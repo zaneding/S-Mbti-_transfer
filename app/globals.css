@@ -2,8 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Custom animation keyframes ── */
+/* ── Global dark theme ── */
+html,
+body {
+  background-color: #060810;
+  color: #ffffff;
+  min-height: 100%;
+}
 
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #060810;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Section enter animation ── */
 @keyframes fade-slide-up {
   from {
     opacity: 0;
@@ -15,7 +41,12 @@
   }
 }
 
-@keyframes fade-in {
+.section-animate-in {
+  animation: fade-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Type card stagger animation ── */
+@keyframes fade-in-card {
   from {
     opacity: 0;
     transform: translateY(10px) scale(0.97);
@@ -26,18 +57,17 @@
   }
 }
 
-/* ── Section enter animation ── */
-.section-animate-in {
-  animation: fade-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ── Individual type card stagger animation ── */
 .type-card-animate {
   opacity: 0;
-  animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fade-in-card 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ── Smooth scroll behavior ── */
-html {
-  scroll-behavior: smooth;
+/* ── Pulse animation for status dot ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
 }
