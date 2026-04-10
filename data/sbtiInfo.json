@@ -1,0 +1,199 @@
+{
+  "_note": "Replace the placeholder content below with real descriptions. Each type needs: description (string), traits (string[]), strengths (string[]), weaknesses (string[]), inRelationships (string).",
+  "BOSS": {
+    "description": "内容即将更新",
+    "traits": ["天生领导", "目标明确", "行动力强"],
+    "strengths": ["极强的执行力", "清晰的战略思维"],
+    "weaknesses": ["有时过于强势", "不易接受他人意见"],
+    "inRelationships": "在感情中倾向于主导节奏，需要一个能接住自己能量的伴侣。"
+  },
+  "CTRL": {
+    "description": "内容即将更新",
+    "traits": ["控场大师", "思维缜密", "掌控全局"],
+    "strengths": ["出色的统筹能力", "对局势把握精准"],
+    "weaknesses": ["有时过于掌控", "难以放松"],
+    "inRelationships": "在感情中习惯把控节奏，需要一个愿意配合又有自己主见的伴侣。"
+  },
+  "GOGO": {
+    "description": "内容即将更新",
+    "traits": ["先干再说", "行动力超强", "敢于冒险"],
+    "strengths": ["极强的执行力", "敢于突破"],
+    "weaknesses": ["容易冲动", "缺乏耐心"],
+    "inRelationships": "在感情中热情直接，需要一个能跟上自己节奏的伴侣。"
+  },
+  "EXECUTOR": {
+    "description": "内容即将更新",
+    "traits": ["稳定输出", "踏实可靠", "责任心强"],
+    "strengths": ["高度可靠", "执行力强"],
+    "weaknesses": ["有时缺乏灵活性", "不善于变通"],
+    "inRelationships": "在感情中稳定可靠，需要一个珍视踏实付出的伴侣。"
+  },
+  "OH-NO": {
+    "description": "内容即将更新",
+    "traits": ["提前预警", "风险意识强", "谨慎思考"],
+    "strengths": ["超强的风险预判", "细心周到"],
+    "weaknesses": ["容易过度担忧", "难以放松"],
+    "inRelationships": "在感情中谨慎保守，需要一个给予安全感的伴侣。"
+  },
+  "Dior-s": {
+    "description": "内容即将更新",
+    "traits": ["洞察本质", "思维深邃", "独立思考"],
+    "strengths": ["深刻的洞察力", "独立的思维"],
+    "weaknesses": ["有时显得冷漠", "不易被理解"],
+    "inRelationships": "在感情中重视智识上的契合，需要一个能理解自己深度思考的伴侣。"
+  },
+  "FAKE": {
+    "description": "内容即将更新",
+    "traits": ["多面人格", "适应力强", "灵活多变"],
+    "strengths": ["极强的适应能力", "善于社交"],
+    "weaknesses": ["真实自我难被看见", "容易迷失"],
+    "inRelationships": "在感情中需要找到真正接纳自己多面性的伴侣。"
+  },
+  "OJBK": {
+    "description": "内容即将更新",
+    "traits": ["佛系人生", "随遇而安", "内心平静"],
+    "strengths": ["极强的包容心", "不易焦虑"],
+    "weaknesses": ["缺乏主动性", "容易被忽视"],
+    "inRelationships": "在感情中随和包容，需要一个能激发自己积极性的伴侣。"
+  },
+  "ANALYST": {
+    "description": "内容即将更新",
+    "traits": ["逻辑机器", "思维严密", "追求真理"],
+    "strengths": ["超强的逻辑分析", "客观理性"],
+    "weaknesses": ["忽视情感因素", "沟通方式直接"],
+    "inRelationships": "在感情中重视理性沟通，需要一个能接受直接表达的伴侣。"
+  },
+  "DETACHED": {
+    "description": "内容即将更新",
+    "traits": ["情绪关闭", "独立冷静", "自给自足"],
+    "strengths": ["情绪稳定", "独立能力强"],
+    "weaknesses": ["难以表达情感", "显得疏离"],
+    "inRelationships": "在感情中需要大量个人空间，需要一个理解并尊重自己边界的伴侣。"
+  },
+  "LOVE-R": {
+    "description": "内容即将更新",
+    "traits": ["爱情优先", "感情丰富", "浪漫主义"],
+    "strengths": ["深情专一", "善于营造浪漫"],
+    "weaknesses": ["容易沉浸感情", "理性不足"],
+    "inRelationships": "在感情中全情投入，需要一个同样重视感情的伴侣。"
+  },
+  "ATM-er": {
+    "description": "内容即将更新",
+    "traits": ["过度付出", "慷慨大方", "照顾他人"],
+    "strengths": ["无私奉献", "体贴周到"],
+    "weaknesses": ["容易被利用", "忽视自身需求"],
+    "inRelationships": "在感情中倾向于无条件付出，需要一个懂得珍惜和回馈的伴侣。"
+  },
+  "MUM": {
+    "description": "内容即将更新",
+    "traits": ["照顾所有人", "母性关怀", "温暖包容"],
+    "strengths": ["强大的包容力", "善于照顾他人"],
+    "weaknesses": ["容易忽视自己", "过度操心"],
+    "inRelationships": "在感情中扮演照顾者角色，需要一个懂得反向给予温暖的伴侣。"
+  },
+  "THAN-K": {
+    "description": "内容即将更新",
+    "traits": ["永远体贴", "善解人意", "周到细心"],
+    "strengths": ["高情商", "善于维护关系"],
+    "weaknesses": ["有时委屈自己", "难以拒绝他人"],
+    "inRelationships": "在感情中体贴入微，需要一个同样关注自己感受的伴侣。"
+  },
+  "SEXY": {
+    "description": "内容即将更新",
+    "traits": ["魅力中心", "吸引力强", "自信迷人"],
+    "strengths": ["天然的吸引力", "社交魅力"],
+    "weaknesses": ["容易引发误解", "需要持续关注"],
+    "inRelationships": "在感情中魅力四射，需要一个有安全感且欣赏自己的伴侣。"
+  },
+  "JOKE-R": {
+    "description": "内容即将更新",
+    "traits": ["气氛担当", "幽默风趣", "活跃气场"],
+    "strengths": ["极强的感染力", "化解紧张气氛"],
+    "weaknesses": ["难以认真", "被当作开心果"],
+    "inRelationships": "在感情中用幽默化解矛盾，需要一个欣赏并接纳认真一面的伴侣。"
+  },
+  "MALO": {
+    "description": "内容即将更新",
+    "traits": ["制造混乱", "挑战规则", "爱搞事情"],
+    "strengths": ["敢于突破常规", "充满活力"],
+    "weaknesses": ["容易引发冲突", "难以安定"],
+    "inRelationships": "在感情中充满刺激，需要一个能驾驭自己活力又不失理性的伴侣。"
+  },
+  "WOC!": {
+    "description": "内容即将更新",
+    "traits": ["情绪夸张", "表达丰富", "感染力强"],
+    "strengths": ["情感表达直接", "极具感染力"],
+    "weaknesses": ["情绪波动大", "容易戏剧化"],
+    "inRelationships": "在感情中情感浓烈，需要一个能包容并欣赏自己情绪表达的伴侣。"
+  },
+  "PERFORMER": {
+    "description": "内容即将更新",
+    "traits": ["爱被关注", "表现欲强", "舞台感十足"],
+    "strengths": ["极强的表现力", "善于吸引眼球"],
+    "weaknesses": ["需要持续认可", "难以低调"],
+    "inRelationships": "在感情中需要被欣赏，需要一个真诚欣赏自己光芒的伴侣。"
+  },
+  "ALARMIST": {
+    "description": "内容即将更新",
+    "traits": ["高敏预警", "敏感细腻", "洞察力强"],
+    "strengths": ["超强的感知力", "善于察觉变化"],
+    "weaknesses": ["容易过度焦虑", "需要大量安慰"],
+    "inRelationships": "在感情中高度敏感，需要一个耐心给予安全感的伴侣。"
+  },
+  "WHATEVER": {
+    "description": "内容即将更新",
+    "traits": ["什么都行", "随和无争", "佛系处世"],
+    "strengths": ["极强的包容力", "不制造冲突"],
+    "weaknesses": ["缺乏主见", "容易被主导"],
+    "inRelationships": "在感情中随遇而安，需要一个能引导方向又不强迫的伴侣。"
+  },
+  "CYNIC": {
+    "description": "内容即将更新",
+    "traits": ["不信世界", "批判思维", "看透表象"],
+    "strengths": ["深刻的批判性思维", "不轻易被欺骗"],
+    "weaknesses": ["悲观消极", "难以建立信任"],
+    "inRelationships": "在感情中需要被真正打动，需要一个有耐心赢得自己信任的伴侣。"
+  },
+  "MASKER": {
+    "description": "内容即将更新",
+    "traits": ["看人下菜", "社交灵活", "随机应变"],
+    "strengths": ["极强的社交适应力", "八面玲珑"],
+    "weaknesses": ["真实自我难显现", "容易显得不真诚"],
+    "inRelationships": "在感情中需要卸下面具，需要一个能让自己真实做自己的伴侣。"
+  },
+  "LOST": {
+    "description": "内容即将更新",
+    "traits": ["找不到方向", "内心丰富", "探索自我"],
+    "strengths": ["丰富的内心世界", "对人生充满思考"],
+    "weaknesses": ["缺乏方向感", "容易陷入迷茫"],
+    "inRelationships": "在感情中需要引导与陪伴，需要一个能给予方向感又不失温柔的伴侣。"
+  },
+  "HUSTLER": {
+    "description": "内容即将更新",
+    "traits": ["拼命往上", "奋斗不止", "目标驱动"],
+    "strengths": ["极强的上进心", "自律高效"],
+    "weaknesses": ["容易忽视感情", "工作生活失衡"],
+    "inRelationships": "在感情中需要理解与支持，需要一个欣赏自己努力又能把自己拉回生活的伴侣。"
+  },
+  "PLAYER": {
+    "description": "内容即将更新",
+    "traits": ["享乐主义", "活在当下", "乐于体验"],
+    "strengths": ["强大的享受生活能力", "乐观开朗"],
+    "weaknesses": ["缺乏责任感", "难以承诺"],
+    "inRelationships": "在感情中带来快乐与刺激，需要一个既享受当下又有未来规划的伴侣。"
+  },
+  "DREAMER": {
+    "description": "内容即将更新",
+    "traits": ["理想主义", "充满幻想", "追求美好"],
+    "strengths": ["丰富的想象力", "对生活充满热情"],
+    "weaknesses": ["脱离现实", "难以落地执行"],
+    "inRelationships": "在感情中充满浪漫幻想，需要一个既欣赏梦想又帮助落地的伴侣。"
+  },
+  "FIXER": {
+    "description": "内容即将更新",
+    "traits": ["收拾残局", "善后能力强", "解决问题"],
+    "strengths": ["极强的问题解决能力", "默默承担"],
+    "weaknesses": ["容易被忽视", "承受过多"],
+    "inRelationships": "在感情中默默付出，需要一个能看见并珍惜自己付出的伴侣。"
+  }
+}
