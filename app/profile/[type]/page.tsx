@@ -1,9 +1,36 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft, Hash, Sparkles } from 'lucide-react'
 import { getSbtiType, sbtiTypes } from '@/data/sbti-types'
-import { getCategoryColors } from '@/lib/category-colors'
 import sbtiInfo from '@/data/sbtiInfo.json'
 import type { ProfileInfo } from '@/components/ProfileCard'
+
+const CAT_GRADIENT: Record<string, string> = {
+  '控制': 'from-rose-400 to-rose-600',
+  '理性': 'from-slate-400 to-slate-600',
+  '情感': 'from-pink-400 to-pink-600',
+  '社交': 'from-orange-400 to-orange-600',
+  '状态': 'from-amber-400 to-amber-600',
+  '补充': 'from-teal-400 to-cyan-600',
+}
+
+const CAT_COLOR: Record<string, string> = {
+  '控制': 'text-rose-500',
+  '理性': 'text-slate-500',
+  '情感': 'text-pink-500',
+  '社交': 'text-orange-500',
+  '状态': 'text-amber-500',
+  '补充': 'text-teal-500',
+}
+
+const CAT_BG: Record<string, string> = {
+  '控制': 'bg-rose-100 text-rose-600',
+  '理性': 'bg-slate-100 text-slate-600',
+  '情感': 'bg-pink-100 text-pink-600',
+  '社交': 'bg-orange-100 text-orange-600',
+  '状态': 'bg-amber-100 text-amber-600',
+  '补充': 'bg-teal-100 text-teal-600',
+}
 
 interface PageProps {
   params: Promise<{ type: string }>
@@ -13,178 +40,170 @@ export function generateStaticParams() {
   return sbtiTypes.map((t) => ({ type: t.code }))
 }
 
-export default async function ProfilePage({ params }: PageProps) {
+export default async function ProfileDetailPage({ params }: PageProps) {
   const { type: typeParam } = await params
   const sbtiType = getSbtiType(typeParam)
 
   if (!sbtiType) notFound()
 
   const info = (sbtiInfo as unknown as Record<string, ProfileInfo | undefined>)[sbtiType.code]
-  const colors = getCategoryColors(sbtiType.category)
+  const gradient = CAT_GRADIENT[sbtiType.category] ?? 'from-slate-400 to-slate-600'
+  const colorText = CAT_COLOR[sbtiType.category] ?? 'text-slate-500'
+  const colorBadge = CAT_BG[sbtiType.category] ?? 'bg-slate-100 text-slate-600'
 
   return (
-    <main className="min-h-screen" style={{ background: '#0d0d18' }}>
-      {/* Background */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div
-          className="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full blur-3xl opacity-20"
-          style={{ background: `radial-gradient(circle, var(--glow-color, rgba(139,92,246,0.4)) 0%, transparent 70%)` }}
-        />
-      </div>
+    <div className="min-h-screen bg-slate-100 flex flex-col items-center">
 
-      {/* Gradient header band */}
-      <div className="relative z-10 overflow-hidden" style={{ minHeight: '240px' }}>
-        <div
-          className={`absolute inset-0 bg-gradient-to-br ${colors.gradient} opacity-15`}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to bottom, transparent 60%, #0d0d18 100%)' }}
-        />
+      {/* Sticky nav */}
+      <nav className="w-full flex justify-between items-center px-5 py-4 z-10 sticky top-0 bg-slate-100/90 backdrop-blur-md">
+        <Link
+          href="/profile"
+          className="p-2.5 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow text-slate-700"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <span className={`font-bold tracking-widest text-sm uppercase ${colorText}`}>
+          {sbtiType.category}
+        </span>
+        <Link
+          href={`/compatibility?a=${sbtiType.code}`}
+          className="p-2.5 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow text-slate-700"
+        >
+          <span className="text-xs font-bold px-1">💕</span>
+        </Link>
+      </nav>
 
-        <div className="relative z-10 max-w-2xl mx-auto px-6 pt-8 pb-8">
-          {/* Nav */}
-          <div className="flex items-center justify-between mb-10">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors text-sm"
-            >
-              ← 返回首页
-            </Link>
-            <Link
-              href={`/compatibility?a=${sbtiType.code}`}
-              className="text-sm px-4 py-1.5 rounded-full font-medium text-white transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)', boxShadow: '0 0 20px rgba(236,72,153,0.3)' }}
-            >
-              测匹配度 →
-            </Link>
+      <main className="flex-1 w-full px-5 py-4 flex flex-col max-w-lg">
+
+        {/* Main card */}
+        <div className="relative bg-white rounded-[2rem] p-7 shadow-xl shadow-slate-200/60 flex flex-col">
+
+          {/* Decoration blob */}
+          <div className={`absolute top-0 right-0 w-56 h-56 bg-gradient-to-br ${gradient} blur-3xl opacity-15 rounded-bl-[100px]`} />
+          <div className="absolute top-6 right-6">
+            <Sparkles className={`w-7 h-7 opacity-35 ${colorText}`} />
           </div>
 
-          {/* Type header */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${colors.badge}`}>
-                {sbtiType.category}
-              </span>
-              <span
-                className="text-xs px-3 py-1 rounded-full font-mono"
-                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)' }}
-              >
-                {sbtiType.mbti}
-              </span>
-            </div>
-            <h1
-              className={`text-5xl sm:text-6xl font-black bg-gradient-to-r ${colors.gradient} bg-clip-text`}
-              style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-            >
-              {sbtiType.code}
+          <div className="relative z-10">
+            {/* Badge */}
+            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black tracking-widest mb-5 ${colorBadge}`}>
+              SBTI · {sbtiType.category}
+            </span>
+
+            {/* Name */}
+            <h1 className="text-5xl font-black text-slate-900 mb-1 tracking-tighter">
+              {sbtiType.label}
             </h1>
-            <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-bold text-white">{sbtiType.label}</span>
-              <span className="text-white/40 text-sm italic">"{sbtiType.tagline}"</span>
-            </div>
-          </div>
-        </div>
-      </div>
+            <p className={`text-sm font-mono font-bold mb-2 ${colorText}`}>{sbtiType.code}</p>
+            <p className="text-slate-500 text-sm italic mb-6">"{sbtiType.tagline}"</p>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 pb-20 -mt-2">
-        {info ? (
-          <div className="flex flex-col gap-4">
-            {/* Traits */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-            >
-              <p className="text-white/30 text-xs font-semibold uppercase tracking-widest mb-3">核心特征</p>
+            {/* Description */}
+            {info?.description && info.description !== '内容即将更新' && (
+              <p className="text-slate-600 text-base font-medium leading-relaxed mb-7">
+                {info.description}
+              </p>
+            )}
+
+            {/* MBTI mappings */}
+            <div className="mb-7 border-t border-slate-100 pt-6">
+              <h3 className="text-xs font-bold text-slate-400 mb-3 flex items-center gap-2">
+                <Hash className="w-3.5 h-3.5" /> 对应高发 MBTI
+              </h3>
               <div className="flex flex-wrap gap-2">
-                {info.traits.map((t, i) => (
-                  <span key={i} className={`px-3 py-1.5 rounded-full text-sm font-medium ${colors.badge}`}>
-                    {t}
+                {sbtiType.mbti.split('/').map((m) => (
+                  <span
+                    key={m}
+                    className={`px-4 py-2 rounded-xl text-sm font-black text-white bg-gradient-to-r ${gradient} shadow-sm`}
+                  >
+                    {m.trim()}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Description */}
-            {info.description && info.description !== '内容即将更新' && (
-              <div
-                className="rounded-2xl p-5"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <p className="text-white/30 text-xs font-semibold uppercase tracking-widest mb-3">人格解读</p>
-                <p className="text-white/65 leading-relaxed text-sm">{info.description}</p>
+            {/* Traits */}
+            {info?.traits && info.traits.length > 0 && (
+              <div className="border-t border-slate-100 pt-6 mb-7">
+                <h3 className="text-xs font-bold text-slate-400 mb-3 flex items-center gap-2">
+                  <Hash className="w-3.5 h-3.5" /> 核心特征
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {info.traits.map((t, i) => (
+                    <span key={i} className={`px-3 py-1.5 rounded-full text-sm font-semibold ${colorBadge}`}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Strengths */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)' }}
-            >
-              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-3">✦ 优势</p>
-              <ul className="space-y-2.5">
-                {info.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-white/65">
-                    <span className="text-emerald-400 mt-0.5 shrink-0 font-bold">›</span>
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Weaknesses */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
-            >
-              <p className="text-rose-400 text-xs font-semibold uppercase tracking-widest mb-3">✦ 劣势</p>
-              <ul className="space-y-2.5">
-                {info.weaknesses.map((w, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-white/65">
-                    <span className="text-rose-400 mt-0.5 shrink-0 font-bold">›</span>
-                    <span>{w}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* In Relationships */}
-            {info.inRelationships && (
-              <div
-                className="rounded-2xl p-5"
-                style={{ background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.15)' }}
-              >
-                <p className="text-pink-400 text-xs font-semibold uppercase tracking-widest mb-3">💕 在感情中</p>
-                <p className="text-white/65 text-sm leading-relaxed">{info.inRelationships}</p>
+            {info?.strengths && info.strengths.length > 0 && (
+              <div className="border-t border-slate-100 pt-6 mb-7">
+                <h3 className="text-xs font-bold text-emerald-500 mb-3 flex items-center gap-2">
+                  <Hash className="w-3.5 h-3.5" /> 优势
+                </h3>
+                <ul className="space-y-2">
+                  {info.strengths.map((s, i) => (
+                    <li key={i} className="flex items-start gap-3 bg-emerald-50 p-3.5 rounded-2xl">
+                      <span className="text-sm font-black text-emerald-500 mt-0.5 shrink-0">0{i + 1}</span>
+                      <span className="text-slate-700 font-medium text-sm leading-relaxed">{s}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
-            {/* Compatibility CTA */}
-            <Link
-              href={`/compatibility?a=${sbtiType.code}`}
-              className="group flex items-center justify-between rounded-2xl p-5 transition-all hover:scale-[1.01]"
-              style={{
-                background: 'linear-gradient(135deg, rgba(236,72,153,0.12), rgba(190,24,93,0.08))',
-                border: '1px solid rgba(236,72,153,0.2)',
-              }}
-            >
-              <div>
-                <p className="text-pink-400 font-semibold text-sm">测试你和 TA 的匹配度</p>
-                <p className="text-white/35 text-xs mt-0.5">选择对方类型，立刻查看匹配分数</p>
+            {/* Weaknesses */}
+            {info?.weaknesses && info.weaknesses.length > 0 && (
+              <div className="border-t border-slate-100 pt-6 mb-7">
+                <h3 className="text-xs font-bold text-rose-500 mb-3 flex items-center gap-2">
+                  <Hash className="w-3.5 h-3.5" /> 注意事项
+                </h3>
+                <ul className="space-y-2">
+                  {info.weaknesses.map((w, i) => (
+                    <li key={i} className="flex items-start gap-3 bg-rose-50 p-3.5 rounded-2xl">
+                      <span className="text-sm font-black text-rose-400 mt-0.5 shrink-0">0{i + 1}</span>
+                      <span className="text-slate-700 font-medium text-sm leading-relaxed">{w}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <span className="text-pink-400 text-xl group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
+            )}
+
+            {/* In relationships */}
+            {info?.inRelationships && (
+              <div className="border-t border-slate-100 pt-6 mb-7">
+                <h3 className="text-xs font-bold text-pink-500 mb-3 flex items-center gap-2">
+                  <Hash className="w-3.5 h-3.5" /> 在感情中
+                </h3>
+                <div className="bg-pink-50 p-4 rounded-2xl">
+                  <p className="text-slate-700 font-medium text-sm leading-relaxed">{info.inRelationships}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Branding */}
+            <div className="flex justify-between items-center opacity-30 pt-5 border-t border-slate-100/50">
+              <span className="text-xs font-bold font-mono">SBTI.APP</span>
+              <span className="text-xs font-bold font-mono">s-mbti.com</span>
+            </div>
           </div>
-        ) : (
-          <div
-            className="rounded-2xl p-12 text-center"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-6 mb-10">
+          <Link
+            href={`/compatibility?a=${sbtiType.code}`}
+            className="flex w-full items-center justify-center gap-2 bg-slate-900 text-white font-bold text-base py-5 rounded-2xl shadow-xl shadow-slate-900/20 hover:scale-[1.02] transition-transform active:scale-95"
           >
-            <p className="text-white/25 text-sm">详细解读即将更新</p>
-          </div>
-        )}
-      </div>
-    </main>
+            💕 测算与TA的契合度
+          </Link>
+          <p className="text-center text-slate-400 text-xs font-medium mt-3">
+            选择对方的人设类型，立刻查看匹配分数
+          </p>
+        </div>
+      </main>
+    </div>
   )
 }

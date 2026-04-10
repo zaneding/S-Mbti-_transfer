@@ -1,300 +1,182 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { sbtiTypes, type SbtiType } from '@/data/sbti-types'
-import sbtiInfoRaw from '@/data/sbtiInfo.json'
-import type { ProfileInfo } from '@/components/ProfileCard'
+import { Search, Sparkles } from 'lucide-react'
+import { sbtiTypes } from '@/data/sbti-types'
+import { motion } from 'motion/react'
+import clsx from 'clsx'
 
-const sbtiInfo = sbtiInfoRaw as unknown as Record<string, ProfileInfo | undefined>
+const CATEGORIES = ['全部', '控制', '理性', '情感', '社交', '状态', '补充']
 
-/* ── Category config ── */
-const CATS = [
-  { name: '控制', emoji: '👑', color: '#dc2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.25)', glow: 'rgba(220,38,38,0.15)' },
-  { name: '理性', emoji: '🧠', color: '#2563eb', bg: 'rgba(37,99,235,0.08)', border: 'rgba(37,99,235,0.25)', glow: 'rgba(37,99,235,0.15)' },
-  { name: '情感', emoji: '💝', color: '#db2777', bg: 'rgba(219,39,119,0.08)', border: 'rgba(219,39,119,0.25)', glow: 'rgba(219,39,119,0.15)' },
-  { name: '社交', emoji: '🎭', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.25)', glow: 'rgba(124,58,237,0.15)' },
-  { name: '状态', emoji: '🌊', color: '#0d9488', bg: 'rgba(13,148,136,0.08)', border: 'rgba(13,148,136,0.25)', glow: 'rgba(13,148,136,0.15)' },
-  { name: '补充', emoji: '⭐', color: '#d97706', bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.25)', glow: 'rgba(217,119,6,0.15)' },
-]
-
-function getCat(name: string) {
-  return CATS.find(c => c.name === name) ?? CATS[0]
+const CAT_GRADIENT: Record<string, string> = {
+  '控制': 'from-rose-400 to-rose-600',
+  '理性': 'from-slate-400 to-slate-600',
+  '情感': 'from-pink-400 to-pink-600',
+  '社交': 'from-orange-400 to-orange-600',
+  '状态': 'from-amber-400 to-amber-600',
+  '补充': 'from-teal-400 to-cyan-600',
 }
 
-/* ── Profile detail cards ── */
-function ProfileDetail({ type, onClose }: { type: SbtiType; onClose: () => void }) {
-  const cat = getCat(type.category)
-  const info = sbtiInfo[type.code]
-
-  return (
-    <div className="section-animate-in flex flex-col gap-3 sm:gap-4">
-      {/* Banner */}
-      <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex items-start justify-between flex-wrap gap-4"
-        style={{ background: cat.bg, border: `1px solid ${cat.border}`, boxShadow: `0 16px 40px ${cat.glow}` }}>
-        <div>
-          <div className="text-4xl sm:text-5xl font-black tracking-tight font-mono" style={{ color: cat.color }}>
-            {type.code}
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-gray-900 mt-1.5">{type.label}</div>
-          <div className="text-gray-500 text-sm italic mt-1">{type.tagline}</div>
-        </div>
-        <div className="flex flex-col gap-2 items-end">
-          <span className="text-xs font-semibold px-3 py-1 rounded-full"
-            style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.border}` }}>
-            {type.category}
-          </span>
-          <span className="text-xs text-gray-400">MBTI：{type.mbti}</span>
-          <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600 mt-1 transition-colors">
-            ✕ 收起
-          </button>
-        </div>
-      </div>
-
-      {info ? (
-        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-          {info.description && info.description !== '内容即将更新' && (
-            <div className="sm:col-span-2 rounded-xl sm:rounded-2xl p-4 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(139,92,246,0.06)' }}>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">人格解读</div>
-              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{info.description}</p>
-            </div>
-          )}
-
-          {info.traits?.length > 0 && (
-            <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(139,92,246,0.06)' }}>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">核心特质</div>
-              <div className="flex flex-wrap gap-2">
-                {info.traits.map((t, i) => (
-                  <span key={i} className="text-xs sm:text-sm px-3 py-1.5 rounded-full font-medium"
-                    style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.border}` }}>
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {info.inRelationships && (
-            <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(139,92,246,0.06)' }}>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">💝 在关系中</div>
-              <p className="text-gray-600 leading-relaxed text-sm">{info.inRelationships}</p>
-            </div>
-          )}
-
-          {info.strengths?.length > 0 && (
-            <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(139,92,246,0.06)' }}>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">✨ 优势</div>
-              <ul className="flex flex-col gap-2">
-                {info.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />{s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {info.weaknesses?.length > 0 && (
-            <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(139,92,246,0.06)' }}>
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">⚡ 劣势</div>
-              <ul className="flex flex-col gap-2">
-                {info.weaknesses.map((w, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0" />{w}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-            <Link href={`/compatibility?a=${type.code}`}
-              className="text-center font-semibold py-3 rounded-xl text-sm transition-all duration-200 active:scale-95 hover:scale-[1.02]"
-              style={{ background: 'rgba(219,39,119,0.10)', border: '1px solid rgba(219,39,119,0.30)', color: '#9d174d' }}>
-              💕 情侣匹配测试
-            </Link>
-            <Link href={`/profile/${type.code}`}
-              className="text-center font-semibold py-3 rounded-xl text-sm transition-all duration-200 active:scale-95 hover:scale-[1.02]"
-              style={{ background: 'rgba(255,255,255,0.70)', border: '1px solid rgba(139,92,246,0.20)', color: '#5b21b6' }}>
-              查看完整详情 →
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-xl p-8 text-center text-gray-400 text-sm"
-          style={{ background: 'rgba(255,255,255,0.50)', border: '1px solid rgba(255,255,255,0.80)' }}>
-          详细解读即将更新
-        </div>
-      )}
-    </div>
-  )
+const CAT_COLOR: Record<string, string> = {
+  '控制': 'text-rose-500',
+  '理性': 'text-slate-500',
+  '情感': 'text-pink-500',
+  '社交': 'text-orange-500',
+  '状态': 'text-amber-500',
+  '补充': 'text-teal-500',
 }
 
-/* ── Main page ── */
-export default function ProfileSelectorPage() {
-  const [selected, setSelected] = useState<SbtiType | null>(null)
-  const [showAll, setShowAll] = useState(false)
-  const profileRef = useRef<HTMLDivElement>(null)
+export default function ProfilePage() {
+  const [query, setQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState('全部')
 
-  function pickType(type: SbtiType) {
-    setSelected(type)
-    setTimeout(() => {
-      profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 80)
-  }
+  const filtered = useMemo(() => {
+    return sbtiTypes.filter((item) => {
+      const matchesSearch =
+        item.code.toLowerCase().includes(query.toLowerCase()) ||
+        item.label.includes(query) ||
+        item.tagline.includes(query) ||
+        item.mbti.toLowerCase().includes(query.toLowerCase())
+      const matchesCat = activeCategory === '全部' || item.category === activeCategory
+      return matchesSearch && matchesCat
+    })
+  }, [query, activeCategory])
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(160deg, #f5f0ff 0%, #fdf2f8 50%, #eef2ff 100%)' }}>
-      {/* Ambient blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-[10%] left-[5%] w-[500px] h-[500px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[5%] right-[-5%] w-[400px] h-[400px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(236,72,153,0.10) 0%, transparent 70%)' }} />
-      </div>
+    <div className="min-h-screen bg-slate-50 pb-24">
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8 sm:gap-10">
+      {/* Sticky Header */}
+      <div className="bg-white px-5 pt-10 pb-5 rounded-b-[2rem] shadow-sm mb-5 z-20 sticky top-0">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 mb-3"
+        >
+          <Sparkles className="w-4 h-4 text-rose-500" />
+          <Link href="/" className="text-rose-500 font-semibold tracking-wider text-xs hover:text-rose-600 transition-colors">
+            ← 返回首页
+          </Link>
+        </motion.div>
 
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <Link href="/" className="mt-1 text-sm text-violet-400 hover:text-violet-600 transition-colors flex-shrink-0">← 返回</Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-violet-950">MBTI 对照查询</h1>
-            <p className="text-violet-400 text-sm mt-1">选择你的 SBTI 类型，查看对应 MBTI 与完整人格解读</p>
-          </div>
-        </div>
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-2xl sm:text-3xl font-black text-slate-900 mb-5 tracking-tight leading-snug"
+        >
+          测MBTI过时了？<br />
+          来看你的{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-500">
+            SBTI
+          </span>{' '}
+          人设
+        </motion.h1>
 
-        {/* ── Single-select mode (default) ── */}
-        {!showAll && (
-          <div className="flex flex-col gap-5">
-            {/* Big selector card */}
-            <div className="rounded-2xl p-5 sm:p-6"
-              style={{ background: 'rgba(255,255,255,0.70)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 8px 32px rgba(139,92,246,0.10)' }}>
-              <p className="text-sm font-semibold text-gray-500 mb-3">选择你的类型</p>
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="relative flex items-center mb-4"
+        >
+          <Search className="w-4 h-4 absolute left-4 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="搜索类型、标签或 MBTI（如 'INTJ'）"
+            className="w-full bg-slate-100 rounded-2xl py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-rose-500/20 focus:bg-white transition-all text-slate-700 text-sm font-medium placeholder:text-slate-400"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </motion.div>
 
-              {/* Category + type two-step selector */}
-              <div className="flex flex-col gap-4">
-                {CATS.map(cat => {
-                  const types = sbtiTypes.filter(t => t.category === cat.name)
-                  const selectedInCat = types.find(t => t.code === selected?.code)
-                  return (
-                    <details key={cat.name} className="group" open={!!selectedInCat}>
-                      <summary className="flex items-center gap-2 cursor-pointer select-none list-none py-2.5 px-3 rounded-xl transition-colors hover:bg-white/60"
-                        style={{ borderBottom: `1px solid rgba(0,0,0,0.05)` }}>
-                        <span className="text-lg">{cat.emoji}</span>
-                        <span className="font-semibold text-sm" style={{ color: cat.color }}>{cat.name}</span>
-                        <span className="text-xs text-gray-400 ml-1">{types.length} 种</span>
-                        {selectedInCat && (
-                          <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.border}` }}>
-                            {selectedInCat.label}
-                          </span>
-                        )}
-                        <span className="ml-auto text-gray-300 text-xs group-open:rotate-180 transition-transform duration-200">▼</span>
-                      </summary>
-
-                      <div className="pt-2 pb-1 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {types.map(type => {
-                          const isSelected = selected?.code === type.code
-                          return (
-                            <button key={type.code} onClick={() => pickType(type)}
-                              className="min-h-[72px] sm:min-h-[80px] rounded-xl p-3 text-left transition-all duration-200 active:scale-95 hover:scale-[1.02]"
-                              style={{
-                                background: isSelected ? cat.bg : 'rgba(255,255,255,0.60)',
-                                backdropFilter: 'blur(12px)',
-                                border: `1px solid ${isSelected ? cat.border : 'rgba(0,0,0,0.07)'}`,
-                                boxShadow: isSelected ? `0 8px 24px ${cat.glow}` : '0 2px 8px rgba(0,0,0,0.04)',
-                              }}>
-                              <div className="text-xs font-bold font-mono" style={{ color: isSelected ? cat.color : '#9ca3af' }}>
-                                {type.code}
-                              </div>
-                              <div className="text-sm font-semibold text-gray-800 mt-0.5">{type.label}</div>
-                              <div className="text-xs text-gray-400 mt-0.5 leading-snug hidden sm:block">{type.tagline}</div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </details>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* "Show all" toggle button */}
-            <button onClick={() => setShowAll(true)}
-              className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-95"
-              style={{ background: 'rgba(255,255,255,0.60)', backdropFilter: 'blur(12px)', border: '1px solid rgba(139,92,246,0.20)', color: '#7c3aed' }}>
-              查看所有类型对照 →
-            </button>
-          </div>
-        )}
-
-        {/* ── All types grid (expanded mode) ── */}
-        {showAll && (
-          <div className="flex flex-col gap-8 section-animate-in">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setShowAll(false)}
-                className="text-sm font-semibold transition-colors hover:scale-[1.02] px-3 py-1.5 rounded-lg"
-                style={{ background: 'rgba(139,92,246,0.10)', color: '#7c3aed', border: '1px solid rgba(139,92,246,0.20)' }}>
-                ← 收起
-              </button>
-              <p className="text-sm text-gray-400">全部 28 种类型 — 点击选择</p>
-              {selected && (
-                <span className="ml-auto text-xs font-semibold px-2 py-1 rounded-full"
-                  style={{ background: getCat(selected.category).bg, color: getCat(selected.category).color, border: `1px solid ${getCat(selected.category).border}` }}>
-                  已选：{selected.label}
-                </span>
+        {/* Category pills */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide -mx-5 px-5"
+        >
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={clsx(
+                'whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all',
+                activeCategory === cat
+                  ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
               )}
-            </div>
+            >
+              {cat}
+            </button>
+          ))}
+        </motion.div>
+      </div>
 
-            {CATS.map(cat => {
-              const types = sbtiTypes.filter(t => t.category === cat.name)
-              return (
-                <section key={cat.name}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg select-none">{cat.emoji}</span>
-                    <h2 className="text-sm font-bold" style={{ color: cat.color }}>{cat.name}</h2>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
-                    {types.map((type, i) => {
-                      const isSel = selected?.code === type.code
-                      return (
-                        <button key={type.code} onClick={() => pickType(type)}
-                          className="type-card-animate min-h-[80px] sm:min-h-[92px] rounded-2xl p-3.5 text-left transition-all duration-250 active:scale-95 hover:scale-[1.03]"
-                          style={{
-                            animationDelay: `${i * 40}ms`,
-                            background: isSel ? cat.bg : 'rgba(255,255,255,0.65)',
-                            backdropFilter: 'blur(14px)',
-                            border: `1px solid ${isSel ? cat.border : 'rgba(0,0,0,0.07)'}`,
-                            boxShadow: isSel ? `0 10px 30px ${cat.glow}` : '0 2px 10px rgba(0,0,0,0.04)',
-                          }}>
-                          <div className="text-xs font-bold font-mono" style={{ color: isSel ? cat.color : '#9ca3af' }}>
-                            {type.code}
-                          </div>
-                          <div className="text-sm font-semibold text-gray-800 mt-0.5">{type.label}</div>
-                          <div className="text-xs text-gray-400 mt-1 leading-snug hidden sm:block">{type.tagline}</div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-        )}
+      {/* Grid */}
+      <div className="px-5">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-2 gap-3 sm:gap-4"
+        >
+          {filtered.map((item, i) => (
+            <Link key={item.code} href={`/profile/${item.code}`}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                whileHover={{ y: -4 }}
+                className="bg-white rounded-[1.5rem] p-4 sm:p-5 shadow-sm border border-slate-100 flex flex-col h-full relative overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+              >
+                {/* Decoration blob */}
+                <div className={clsx(
+                  'absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl opacity-25 bg-gradient-to-br',
+                  CAT_GRADIENT[item.category] ?? 'from-slate-300 to-slate-400'
+                )} />
 
-        {/* ── Profile detail ── */}
-        {selected && (
-          <div ref={profileRef} key={selected.code} className="scroll-mt-6">
-            <ProfileDetail type={selected} onClose={() => setSelected(null)} />
+                <span className={clsx(
+                  'text-xs font-bold mb-2 uppercase tracking-wider relative',
+                  CAT_COLOR[item.category] ?? 'text-slate-400'
+                )}>
+                  {item.category}
+                </span>
+
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-0.5 relative">{item.label}</h3>
+                <p className="text-xs text-slate-400 mb-auto relative">{item.tagline}</p>
+
+                {/* MBTI chips */}
+                <div className="flex gap-1 flex-wrap mt-3 pt-3 border-t border-slate-50 relative">
+                  {item.mbti.split('/').slice(0, 2).map((m) => (
+                    <span
+                      key={m}
+                      className={clsx(
+                        'text-[10px] px-2 py-1 rounded-md font-bold bg-slate-100',
+                        CAT_COLOR[item.category] ?? 'text-slate-500'
+                      )}
+                    >
+                      {m.trim()}
+                    </span>
+                  ))}
+                  {item.mbti.split('/').length > 2 && (
+                    <span className="text-[10px] px-2 py-1 rounded-md font-bold bg-slate-100 text-slate-400">
+                      +{item.mbti.split('/').length - 2}
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+          ))}
+        </motion.div>
+
+        {filtered.length === 0 && (
+          <div className="text-center py-20 text-slate-400">
+            <p className="text-lg font-medium">没有找到对应的人设~</p>
+            <p className="text-sm mt-1">换个搜索词试试？</p>
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

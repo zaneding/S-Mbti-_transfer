@@ -3,134 +3,151 @@
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import ScoreCard from '@/components/ScoreCard'
+import { Heart, Sparkles, X, ArrowLeft } from 'lucide-react'
+import { sbtiTypes, type SbtiType } from '@/data/sbti-types'
 import { getScore } from '@/data/compatibility'
 import { getScoreLevel } from '@/data/score-comments'
 import type { ScoreLevel } from '@/data/score-comments'
-import { sbtiTypes } from '@/data/sbti-types'
+import { motion, AnimatePresence } from 'motion/react'
+import clsx from 'clsx'
+
+// ── category colour helpers ────────────────────────────────────────────
+const CAT_GRADIENT: Record<string, string> = {
+  '控制': 'from-rose-400 to-rose-600',
+  '理性': 'from-slate-400 to-slate-600',
+  '情感': 'from-pink-400 to-pink-600',
+  '社交': 'from-orange-400 to-orange-600',
+  '状态': 'from-amber-400 to-amber-600',
+  '补充': 'from-teal-400 to-cyan-600',
+}
+
+const CAT_COLOR: Record<string, string> = {
+  '控制': 'text-rose-500',
+  '理性': 'text-slate-500',
+  '情感': 'text-pink-500',
+  '社交': 'text-orange-500',
+  '状态': 'text-amber-500',
+  '补充': 'text-teal-500',
+}
+
+const CATS = ['控制', '理性', '情感', '社交', '状态', '补充']
 
 interface Result {
   score: number
   level: ScoreLevel
 }
 
-const CATS = [
-  { name: '控制', emoji: '👑', color: '#7c3aed', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.25)' },
-  { name: '理性', emoji: '🧠', color: '#0891b2', bg: 'rgba(8,145,178,0.10)', border: 'rgba(8,145,178,0.25)' },
-  { name: '情感', emoji: '💖', color: '#db2777', bg: 'rgba(236,72,153,0.10)', border: 'rgba(236,72,153,0.25)' },
-  { name: '社交', emoji: '🎉', color: '#d97706', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)' },
-  { name: '状态', emoji: '🌀', color: '#059669', bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.25)' },
-  { name: '补充', emoji: '✨', color: '#e11d48', bg: 'rgba(244,63,94,0.10)', border: 'rgba(244,63,94,0.25)' },
-]
-
-function TypePicker({
+// ── SelectBox ─────────────────────────────────────────────────────────
+function SelectBox({
   label,
   value,
   onChange,
-  accentColor,
 }: {
   label: string
   value: string
   onChange: (v: string) => void
-  accentColor: string
 }) {
-  const [open, setOpen] = useState(false)
-  const selected = sbtiTypes.find(t => t.code === value)
-  const cat = selected ? CATS.find(c => c.name === selected.category) : null
+  const [isOpen, setIsOpen] = useState(false)
+  const item = sbtiTypes.find((t) => t.code === value)
+  const gradient = item ? CAT_GRADIENT[item.category] ?? 'from-slate-200 to-slate-300' : ''
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="text-xs font-semibold tracking-widest uppercase"
-        style={{ color: accentColor, opacity: 0.7 }}>
-        {label}
-      </div>
-
+    <div className="flex-1 relative">
       {/* Trigger card */}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full rounded-2xl p-5 flex flex-col items-center gap-2 text-left transition-all duration-200"
-        style={{
-          background: selected
-            ? (cat?.bg ?? 'rgba(255,255,255,0.65)')
-            : 'rgba(255,255,255,0.65)',
-          backdropFilter: 'blur(20px)',
-          border: `1.5px solid ${selected ? (cat?.border ?? 'rgba(139,92,246,0.25)') : 'rgba(139,92,246,0.18)'}`,
-          boxShadow: open
-            ? `0 8px 32px ${accentColor}22`
-            : '0 2px 16px rgba(139,92,246,0.07)',
-        }}
+      <div
+        onClick={() => setIsOpen(true)}
+        className={clsx(
+          'w-full aspect-square rounded-2xl flex flex-col items-center justify-center p-3 cursor-pointer transition-all select-none',
+          item
+            ? `bg-gradient-to-br ${gradient} text-white shadow-md`
+            : 'bg-slate-50 border-2 border-dashed border-slate-200 hover:bg-slate-100 text-slate-400'
+        )}
       >
-        {selected ? (
+        <span className="text-[10px] font-bold opacity-80 mb-1">{label}</span>
+        {item ? (
           <>
-            <span className="text-3xl">{cat?.emoji ?? '🔮'}</span>
-            <span className="text-lg font-black" style={{ color: cat?.color ?? accentColor }}>
-              {selected.code}
-            </span>
-            <span className="text-sm font-semibold text-violet-800/70">{selected.label}</span>
-            <span className="text-xs text-violet-500/50">{selected.tagline}</span>
+            <span className="font-black text-lg sm:text-xl text-center leading-tight">{item.label}</span>
+            <span className="text-[10px] opacity-70 mt-1 font-mono">{item.code}</span>
           </>
         ) : (
+          <span className="font-black text-sm">点击选择</span>
+        )}
+      </div>
+
+      {/* Bottom sheet */}
+      <AnimatePresence>
+        {isOpen && (
           <>
-            <span className="text-3xl opacity-30">🔮</span>
-            <span className="text-sm font-semibold text-violet-400">点击选择</span>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-slate-900/25 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+
+            {/* Sheet */}
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[2rem] p-5 pb-10 max-w-lg mx-auto shadow-2xl h-[68vh] flex flex-col"
+            >
+              {/* Handle */}
+              <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5" />
+
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-black text-slate-800">选择{label}</h3>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 bg-slate-100 rounded-full text-slate-400 hover:bg-slate-200 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Type list grouped by category */}
+              <div className="overflow-y-auto flex-1 scrollbar-hide pb-4">
+                {CATS.map((cat) => {
+                  const types = sbtiTypes.filter((t) => t.category === cat)
+                  return (
+                    <div key={cat} className="mb-5">
+                      <div className={clsx('text-xs font-black uppercase tracking-widest mb-2', CAT_COLOR[cat])}>
+                        {cat}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {types.map((t) => (
+                          <button
+                            key={t.code}
+                            onClick={() => { onChange(t.code); setIsOpen(false) }}
+                            className={clsx(
+                              'p-3 rounded-xl text-left border-2 transition-all',
+                              value === t.code
+                                ? 'border-rose-500 bg-rose-50'
+                                : 'border-slate-100 bg-white hover:border-slate-200'
+                            )}
+                          >
+                            <div className="text-[10px] font-bold text-slate-400 mb-0.5">{t.code}</div>
+                            <div className="font-black text-slate-800 text-sm">{t.label}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{t.tagline}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </motion.div>
           </>
         )}
-        <span className="text-xs text-violet-400/50 mt-1">{open ? '▲ 收起' : '▼ 展开'}</span>
-      </button>
-
-      {/* Dropdown: categories + types */}
-      {open && (
-        <div
-          className="rounded-2xl p-4 flex flex-col gap-4"
-          style={{
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(139,92,246,0.15)',
-            boxShadow: '0 8px 40px rgba(139,92,246,0.12)',
-          }}
-        >
-          {CATS.map(c => {
-            const types = sbtiTypes.filter(t => t.category === c.name)
-            return (
-              <div key={c.name} className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase"
-                  style={{ color: c.color, opacity: 0.8 }}>
-                  <span>{c.emoji}</span>
-                  <span>{c.name}</span>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
-                  {types.map(t => {
-                    const isSelected = value === t.code
-                    return (
-                      <button
-                        key={t.code}
-                        onClick={() => { onChange(t.code); setOpen(false) }}
-                        className="rounded-xl px-2 py-2 flex flex-col items-center gap-0.5 transition-all duration-150"
-                        style={{
-                          background: isSelected ? c.bg : 'rgba(255,255,255,0.60)',
-                          border: `1px solid ${isSelected ? c.border : 'rgba(139,92,246,0.10)'}`,
-                          boxShadow: isSelected ? `0 2px 12px ${c.color}22` : 'none',
-                        }}
-                      >
-                        <span className="text-[11px] font-black" style={{ color: isSelected ? c.color : '#4c1d95' }}>
-                          {t.code}
-                        </span>
-                        <span className="text-[10px]" style={{ color: isSelected ? c.color : '#7c3aed', opacity: 0.7 }}>
-                          {t.label}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+      </AnimatePresence>
     </div>
   )
 }
 
+// ── Main content ───────────────────────────────────────────────────────
 function CompatibilityContent() {
   const searchParams = useSearchParams()
   const initA = searchParams.get('a') ?? ''
@@ -138,6 +155,7 @@ function CompatibilityContent() {
 
   const [typeA, setTypeA] = useState(initA)
   const [typeB, setTypeB] = useState(initB)
+  const [isMatching, setIsMatching] = useState(false)
   const [result, setResult] = useState<Result | null>(() => {
     if (!initA || !initB) return null
     const score = getScore(initA, initB)
@@ -149,114 +167,207 @@ function CompatibilityContent() {
     return getScore(initA, initB) === null
   })
 
-  function compute(a: string, b: string) {
-    setNoData(false)
+  function handleMatch() {
+    if (!typeA || !typeB) return
+    setIsMatching(true)
     setResult(null)
-    if (!a || !b) return
-    const score = getScore(a, b)
-    if (score === null) {
-      setNoData(true)
-      return
-    }
-    setResult({ score, level: getScoreLevel(score) })
+    setNoData(false)
+    setTimeout(() => {
+      const score = getScore(typeA, typeB)
+      if (score === null) {
+        setNoData(true)
+      } else {
+        setResult({ score, level: getScoreLevel(score) })
+      }
+      setIsMatching(false)
+    }, 1200)
   }
 
+  function handleReset() {
+    setResult(null)
+    setNoData(false)
+  }
+
+  const aItem = sbtiTypes.find((t) => t.code === typeA)
+  const bItem = sbtiTypes.find((t) => t.code === typeB)
+
   return (
-    <main className="min-h-screen flex flex-col overflow-x-hidden"
-      style={{ background: 'linear-gradient(160deg, #f5f0ff 0%, #fdf2f8 50%, #eef2ff 100%)' }}>
+    <div className="min-h-screen bg-slate-50 pb-24 flex flex-col items-center">
 
-      {/* Ambient blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-[10%] -left-[5%] w-[500px] h-[500px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(236,72,153,0.16) 0%, transparent 70%)' }} />
-        <div className="absolute top-[30%] right-[-8%] w-[400px] h-[400px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-0 left-[20%] w-[350px] h-[350px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.10) 0%, transparent 70%)' }} />
-      </div>
+      {/* Header */}
+      <div className="w-full bg-white px-5 pt-10 pb-7 rounded-b-[2.5rem] shadow-sm mb-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-400 blur-[80px] opacity-10 rounded-full" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-400 blur-[80px] opacity-10 rounded-full" />
 
-      <div className="relative z-10 max-w-lg mx-auto w-full px-5 py-10 flex flex-col gap-8">
-
-        {/* Nav */}
-        <Link href="/" className="text-sm font-medium transition-colors"
-          style={{ color: 'rgba(109,40,217,0.55)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(109,40,217,0.9)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(109,40,217,0.55)')}>
-          ← 返回首页
+        <Link href="/" className="relative z-10 flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors text-sm mb-4 w-fit">
+          <ArrowLeft className="w-4 h-4" />
+          返回首页
         </Link>
 
-        {/* Header */}
-        <div className="text-center flex flex-col gap-3">
-          <div className="text-5xl">💕</div>
-          <h1 className="text-3xl sm:text-4xl font-black"
-            style={{
-              background: 'linear-gradient(135deg, #db2777 0%, #7c3aed 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-            情侣匹配度测试
-          </h1>
-          <p className="text-sm text-violet-600/50">选择两个 SBTI 类型，查看你们的契合分数与深度分析</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 flex items-center justify-center gap-2 mb-3"
+        >
+          <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
+        </motion.div>
 
-        {/* Type pickers */}
-        <div className="flex flex-col gap-4">
-          <TypePicker label="你的类型" value={typeA}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative z-10 text-2xl sm:text-3xl font-black text-slate-900 text-center tracking-tight"
+        >
+          灵魂契合度预测
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="relative z-10 text-center text-slate-500 mt-2 text-sm font-medium"
+        >
+          选择两个SBTI人设，看看你们的化学反应
+        </motion.p>
+      </div>
+
+      <div className="w-full px-5 flex-1 flex flex-col max-w-lg">
+
+        {/* Selection row */}
+        <div className="flex items-center justify-between bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-6 relative z-20 gap-4">
+          <SelectBox
+            label="TA的人设"
+            value={typeA}
             onChange={(v) => { setTypeA(v); setResult(null); setNoData(false) }}
-            accentColor="#7c3aed" />
+          />
 
-          {/* VS divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px" style={{ background: 'rgba(139,92,246,0.15)' }} />
-            <span className="text-xs font-black tracking-widest"
-              style={{ color: 'rgba(139,92,246,0.35)' }}>VS</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(139,92,246,0.15)' }} />
+          <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 shadow-sm border-4 border-white">
+            <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
           </div>
 
-          <TypePicker label="TA 的类型" value={typeB}
+          <SelectBox
+            label="我的人设"
+            value={typeB}
             onChange={(v) => { setTypeB(v); setResult(null); setNoData(false) }}
-            accentColor="#db2777" />
+          />
         </div>
 
-        {/* Compute button */}
-        <button
-          onClick={() => compute(typeA, typeB)}
-          disabled={!typeA || !typeB}
-          className="w-full py-4 rounded-2xl font-black text-base text-white transition-all duration-200 hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
-          style={{
-            background: typeA && typeB
-              ? 'linear-gradient(135deg, #ec4899, #7c3aed)'
-              : 'rgba(139,92,246,0.15)',
-            color: typeA && typeB ? 'white' : 'rgba(139,92,246,0.4)',
-            boxShadow: typeA && typeB ? '0 8px 32px rgba(236,72,153,0.30)' : 'none',
-          }}
-        >
-          {typeA && typeB ? '✨ 测试匹配度' : '请选择两个类型'}
-        </button>
+        {/* Action button */}
+        {!result && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleMatch}
+            disabled={!typeA || !typeB || isMatching}
+            className="w-full bg-slate-900 text-white font-bold text-base sm:text-lg py-4 rounded-[1.5rem] shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mb-6"
+          >
+            {isMatching ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              >
+                <Sparkles className="w-5 h-5" />
+              </motion.div>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 text-rose-400" />
+                {typeA && typeB ? '点击测算契合度' : '请先选择两个人设'}
+              </>
+            )}
+          </motion.button>
+        )}
 
         {/* No data */}
         {noData && (
-          <div className="text-center rounded-2xl p-6"
-            style={{
-              background: 'rgba(255,255,255,0.65)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(139,92,246,0.12)',
-            }}>
-            <p className="text-violet-400/70 text-sm">该类型暂无匹配数据</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-6"
+          >
+            <p className="text-slate-400 text-sm">该组合暂无匹配数据</p>
+            <button onClick={handleReset} className="mt-3 text-xs text-rose-500 font-semibold">
+              重新选择
+            </button>
+          </motion.div>
         )}
 
         {/* Result */}
-        {result && (
-          <ScoreCard
-            typeA={typeA}
-            typeB={typeB}
-            score={result.score}
-            level={result.level}
-          />
-        )}
+        <AnimatePresence>
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 200 }}
+              className="w-full bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200 border border-slate-50 relative overflow-hidden"
+            >
+              {/* Decorative blob */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-rose-300 to-orange-300 blur-3xl opacity-15 rounded-full" />
+
+              {/* Reset */}
+              <button
+                onClick={handleReset}
+                className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-400 hover:bg-slate-200 transition-colors z-10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Names */}
+              {aItem && bItem && (
+                <div className="flex items-center justify-center gap-3 mb-5 text-slate-600">
+                  <span className="font-black text-sm">{aItem.label}</span>
+                  <Heart className="w-4 h-4 text-rose-400 fill-rose-400 flex-shrink-0" />
+                  <span className="font-black text-sm">{bItem.label}</span>
+                </div>
+              )}
+
+              {/* Score */}
+              <div className="text-center mb-5">
+                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">MATCH SCORE</span>
+                <div className="flex items-baseline justify-center gap-1 mt-1">
+                  <span
+                    className="text-6xl sm:text-7xl font-black"
+                    style={{
+                      background: 'linear-gradient(135deg, #f43f5e, #fb923c)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    {result.score}
+                  </span>
+                  <span className="text-2xl font-bold text-slate-300">%</span>
+                </div>
+              </div>
+
+              {/* Stars */}
+              <div className="flex justify-center gap-1 mb-5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className={clsx('text-xl', i < result.level.stars ? 'text-rose-400' : 'text-slate-200')}>
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              {/* Label + desc */}
+              <div className="bg-slate-50 rounded-2xl p-5 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-1 rounded-full text-xs font-black tracking-wider">
+                  {result.level.title}
+                </div>
+                <p className="text-center text-slate-600 font-medium leading-relaxed mt-2 text-sm">
+                  {result.level.comment}
+                </p>
+              </div>
+
+              {/* CTA */}
+              <Link
+                href={`/profile/${typeA}`}
+                className="mt-4 flex w-full items-center justify-center gap-2 bg-rose-500 text-white font-bold text-sm py-4 rounded-xl shadow-lg shadow-rose-500/25 hover:bg-rose-600 transition-colors"
+              >
+                查看 {aItem?.label} 人格详情 →
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </main>
+    </div>
   )
 }
 
@@ -264,9 +375,8 @@ export default function CompatibilityPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center"
-          style={{ background: 'linear-gradient(160deg, #f5f0ff 0%, #fdf2f8 50%, #eef2ff 100%)' }}>
-          <div className="text-violet-400/50 text-sm">加载中...</div>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="text-slate-400 text-sm">加载中...</div>
         </div>
       }
     >
