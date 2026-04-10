@@ -25,27 +25,36 @@ export default function TypeSelector({
   placeholder = '请选择类型',
 }: TypeSelectorProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <label className="text-xs font-semibold uppercase tracking-widest text-white/35">
+          {label}
+        </label>
       )}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full rounded-xl px-3 py-2.5 text-sm font-medium appearance-none cursor-pointer transition-all focus:outline-none"
+        style={{
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          color: value ? 'white' : 'rgba(255,255,255,0.35)',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.3)' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 12px center',
+          paddingRight: '32px',
+        }}
       >
-        <option value="" disabled>
+        <option value="" disabled style={{ background: '#1a1a2e', color: 'rgba(255,255,255,0.4)' }}>
           {placeholder}
         </option>
         {GROUPS.map((group) => (
-          <optgroup key={group.name} label={group.name}>
+          <optgroup key={group.name} label={group.name} style={{ background: '#1a1a2e', color: 'rgba(255,255,255,0.6)' }}>
             {group.codes.map((code) => {
-              const t = sbtiTypes.find(
-                (x) => x.code.toLowerCase() === code.toLowerCase()
-              )
+              const t = sbtiTypes.find((x) => x.code.toLowerCase() === code.toLowerCase())
               if (!t) return null
               return (
-                <option key={t.code} value={t.code}>
+                <option key={t.code} value={t.code} style={{ background: '#1a1a2e', color: 'white' }}>
                   {t.code} — {t.label}
                 </option>
               )
