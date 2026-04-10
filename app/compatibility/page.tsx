@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import TypeSelector from '@/components/TypeSelector'
@@ -16,10 +16,25 @@ interface Result {
 
 function CompatibilityContent() {
   const searchParams = useSearchParams()
-  const [typeA, setTypeA] = useState(searchParams.get('a') ?? '')
-  const [typeB, setTypeB] = useState(searchParams.get('b') ?? '')
-  const [result, setResult] = useState<Result | null>(null)
-  const [noData, setNoData] = useState(false)
+
+  // Read URL params once — these are stable at component mount time
+  const initA = searchParams.get('a') ?? ''
+  const initB = searchParams.get('b') ?? ''
+
+  const [typeA, setTypeA] = useState(initA)
+  const [typeB, setTypeB] = useState(initB)
+
+  // Lazy initializers compute from URL params without triggering effects
+  const [result, setResult] = useState<Result | null>(() => {
+    if (!initA || !initB) return null
+    const score = getScore(initA, initB)
+    if (score === null) return null
+    return { score, level: getScoreLevel(score) }
+  })
+  const [noData, setNoData] = useState<boolean>(() => {
+    if (!initA || !initB) return false
+    return getScore(initA, initB) === null
+  })
 
   function compute(a: string, b: string) {
     setNoData(false)
@@ -32,19 +47,6 @@ function CompatibilityContent() {
     }
     setResult({ score, level: getScoreLevel(score) })
   }
-
-  // mount-only: intentionally reads initial URL params once
-  useEffect(() => {
-    const a = searchParams.get('a') ?? ''
-    const b = searchParams.get('b') ?? ''
-    if (!a || !b) return
-    const score = getScore(a, b)
-    if (score === null) {
-      setNoData(true)
-      return
-    }
-    setResult({ score, level: getScoreLevel(score) })
-  }, [])
 
   function handleCompute() {
     compute(typeA, typeB)
