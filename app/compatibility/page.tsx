@@ -16,15 +16,11 @@ interface Result {
 
 function CompatibilityContent() {
   const searchParams = useSearchParams()
-
-  // Read URL params once — these are stable at component mount time
   const initA = searchParams.get('a') ?? ''
   const initB = searchParams.get('b') ?? ''
 
   const [typeA, setTypeA] = useState(initA)
   const [typeB, setTypeB] = useState(initB)
-
-  // Lazy initializers compute from URL params without triggering effects
   const [result, setResult] = useState<Result | null>(() => {
     if (!initA || !initB) return null
     const score = getScore(initA, initB)
@@ -48,24 +44,40 @@ function CompatibilityContent() {
     setResult({ score, level: getScoreLevel(score) })
   }
 
-  function handleCompute() {
-    compute(typeA, typeB)
-  }
-
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10 flex flex-col items-center gap-8">
-      <div className="w-full max-w-lg flex flex-col gap-6">
-        {/* Header */}
+    <main className="min-h-screen" style={{ background: '#0d0d18' }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div
+          className="animate-orb absolute -top-32 left-1/4 w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%)' }}
+        />
+        <div
+          className="animate-orb-slow absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)' }}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-lg mx-auto px-6 py-10 flex flex-col gap-8">
+        {/* Nav */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+          <Link href="/" className="text-white/40 hover:text-white/70 transition-colors text-sm">
             ← 返回首页
           </Link>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 text-center">情侣匹配度测试</h1>
+        {/* Header */}
+        <div className="text-center flex flex-col gap-3">
+          <div className="text-4xl">💕</div>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">情侣匹配度测试</h1>
+          <p className="text-white/35 text-sm">选择两个 SBTI 类型，查看你们的契合分数与深度分析</p>
+        </div>
 
-        {/* Selectors */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-4">
+        {/* Selectors panel */}
+        <div
+          className="rounded-2xl p-6 flex flex-col gap-5"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
           <div className="grid grid-cols-2 gap-4">
             <TypeSelector
               value={typeA}
@@ -73,27 +85,49 @@ function CompatibilityContent() {
               label="你的类型"
               placeholder="请选择"
             />
+            {/* VS divider */}
             <TypeSelector
               value={typeB}
               onChange={(v) => { setTypeB(v); setResult(null); setNoData(false) }}
-              label="TA的类型"
+              label="TA 的类型"
               placeholder="请选择"
             />
           </div>
 
+          {/* VS badge center decoration */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <span className="text-white/25 text-xs font-bold tracking-widest">VS</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          </div>
+
           <button
-            onClick={handleCompute}
+            onClick={() => compute(typeA, typeB)}
             disabled={!typeA || !typeB}
-            className="w-full bg-pink-500 hover:bg-pink-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium py-2.5 rounded-lg transition-colors"
+            className="w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+            style={{
+              background: typeA && typeB
+                ? 'linear-gradient(135deg, #ec4899, #be185d)'
+                : 'rgba(255,255,255,0.08)',
+              color: 'white',
+              boxShadow: typeA && typeB ? '0 0 30px rgba(236,72,153,0.3)' : 'none',
+            }}
           >
-            测试匹配度
+            {typeA && typeB ? '✨ 测试匹配度' : '请选择两个类型'}
           </button>
         </div>
 
-        {/* Result */}
+        {/* No data */}
         {noData && (
-          <div className="text-center text-gray-500 text-sm py-4">该类型暂无匹配数据</div>
+          <div
+            className="text-center rounded-2xl p-6"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <p className="text-white/30 text-sm">该类型暂无匹配数据</p>
+          </div>
         )}
+
+        {/* Result */}
         {result && (
           <ScoreCard
             typeA={typeA}
@@ -109,7 +143,13 @@ function CompatibilityContent() {
 
 export default function CompatibilityPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400">加载中...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center" style={{ background: '#0d0d18' }}>
+          <div className="text-white/25 text-sm">加载中...</div>
+        </div>
+      }
+    >
       <CompatibilityContent />
     </Suspense>
   )
