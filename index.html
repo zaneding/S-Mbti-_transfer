@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SBTI 人格类型图鉴</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --surface-hover: #222539;
+      --border: #2d3148;
+      --accent: #6c63ff;
+      --accent-soft: #4a4580;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --tag-bg: #2a274d;
+      --tag-text: #a99fff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #a99fff 0%, #6c63ff 50%, #ff6b9d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Search */
+    .search-wrap {
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #ff6b9d);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-soft);
+      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      font-family: monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-titles {
+      flex: 1;
+    }
+
+    .card-name-zh {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-analysis {
+      font-size: 0.83rem;
+      color: #aaaac0;
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--border);
+      border: none;
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .modal-tag {
+      font-family: monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #a99fff, #6c63ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      margin-top: 1.25rem;
+    }
+
+    .modal-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .modal-analysis {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .no-result {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 4rem 0;
+      grid-column: 1 / -1;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SBTI 人格类型图鉴</h1>
+    <p>Software Behavior Type Indicator · 探索你的行为人格模式</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num" id="total-count">0</div>
+        <div class="stat-label">人格类型</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="搜索类型标签或名称…" autocomplete="off" />
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-tag" id="m-tag"></div>
+      <div class="modal-name" id="m-name"></div>
+      <div class="modal-section-title">类型描述</div>
+      <div class="modal-desc" id="m-desc"></div>
+      <div class="modal-section-title">深度解析</div>
+      <div class="modal-analysis" id="m-analysis"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>数据来源：sbtiInfo.json · &copy; 2024 SBTI</p>
+  </footer>
+
+  <script>
+    const data = {"CTRL":{"name":"掌控者","description":"典型的秩序与控制导向人格...","analysis":"通常源于对不确定性的低容忍度，这类人往往在成长或环境中经历过失控或混乱，因此发展出通过结构和规则来获得安全感的策略。在选题中，他们更偏向选择可控、可拆解、有明确路径的问题，因为这能最大化其优势并降低风险。"},"ATM-er":{"name":"送钱者","description":"极强付出型人格...","analysis":"这种人格通常与"通过付出来获得价值感"的心理机制相关，可能来自早期被强化的'给予=被认可'模式。在选题中，他们更容易选择利他型、服务型或资源导向的方向，因为帮助他人本身就是其内在奖励机制。"},"Dior-s":{"name":"看透者","description":"高度理性与怀疑导向...","analysis":"形成原因通常是长期理性训练或对信息噪音的敏感，使其习惯去伪存真。在选题上，他们更倾向底层逻辑、批判性分析或反主流视角，因为这类问题能体现其洞察优势。"},"BOSS":{"name":"主导者","description":"天然领导型人格...","analysis":"往往来自对责任与权力的正反馈经验，这类人习惯将控制权与结果绑定。在选题中偏好高影响力、高决策权的方向，例如管理、战略或资源分配类问题。"},"THAN-K":{"name":"感恩者","description":"积极乐观导向人格...","analysis":"通常源于认知重构能力强或环境鼓励正向解释。他们会主动过滤负面信息。在选题中更偏好成长、意义、心理建设等方向。"},"OH-NO":{"name":"预警者","description":"风险扫描型人格...","analysis":"常见于对风险敏感或经历过失败成本较高的个体，因此形成预防机制。在选题中更关注安全、边界、风险控制类问题。"},"GOGO":{"name":"行动者","description":"高行动力人格...","analysis":"通常来自对行动的正反馈或对停滞的不耐受。在选题中更倾向实操、执行、快速见效的方向，而非纯理论。"},"WAIT":{"name":"观望者","description":"谨慎型人格...","analysis":"源于对错误决策成本的敏感，这类人更重视信息充分性。在选题中偏好分析、比较、验证类问题。"},"MOOD":{"name":"情绪型","description":"情绪驱动型人格...","analysis":"形成于高情绪感知能力与表达需求。在选题中更偏好情绪、关系、体验类内容。"},"LOGIC":{"name":"理性派","description":"高度逻辑导向...","analysis":"通常来自理工背景或逻辑训练强化。在选题中偏好模型、结构、数据驱动问题。"},"SOCIAL":{"name":"社交者","description":"以连接为核心...","analysis":"其价值感来源于关系网络。在选题中更倾向人脉、社交、沟通类问题。"},"SOLO":{"name":"独行者","description":"偏内向与独立...","analysis":"对外界刺激敏感，更依赖内在系统。在选题中更偏向深度、专业、独立完成的问题。"},"IDEA":{"name":"创意者","description":"灵感驱动型...","analysis":"源于高发散思维能力。在选题中偏好创新、概念、未来趋势类方向。"},"EXEC":{"name":"执行者","description":"稳定执行型...","analysis":"形成于对完成感的依赖。在选题中偏好流程优化、落地执行类问题。"},"SAFE":{"name":"保守者","description":"风险规避型...","analysis":"通常来自对损失厌恶较强。在选题中偏好稳定收益与成熟路径。"},"RISK":{"name":"冒险者","description":"高风险偏好...","analysis":"来自对不确定性的兴奋感。在选题中偏好新领域、创业、突破类方向。"},"CARE":{"name":"照顾者","description":"高度共情...","analysis":"其价值感来自他人反馈。在选题中偏好服务、教育、支持类问题。"},"SELF":{"name":"自我者","description":"以自我成长为核心...","analysis":"更关注个体体验。在选题中偏好个人成长、自我实现类内容。"},"PLAN":{"name":"规划者","description":"擅长长期规划...","analysis":"源于对未来控制的需求。在选题中偏好路径设计、长期策略。"},"FLOW":{"name":"随性者","description":"顺其自然...","analysis":"对结构依赖低，更依赖环境反馈。在选题中偏好体验式、开放性问题。"},"POWER":{"name":"权力型","description":"对影响力有追求...","analysis":"价值来自地位与资源。在选题中偏好权力结构、竞争策略。"},"PEACE":{"name":"和平者","description":"避免冲突...","analysis":"对冲突敏感。在选题中偏好关系修复、沟通协调。"},"REAL":{"name":"现实派","description":"强调实际...","analysis":"由现实约束驱动。在选题中偏好落地与可执行性。"},"DREAM":{"name":"理想者","description":"以愿景驱动...","analysis":"更关注意义与未来。在选题中偏好愿景与宏大叙事。"},"FAST":{"name":"快节奏","description":"偏好速度...","analysis":"对时间敏感。在选题中偏好效率与短周期成果。"},"SLOW":{"name":"慢节奏","description":"偏好稳定...","analysis":"更重视质量。在选题中偏好深度与精细化问题。"},"BALANCE":{"name":"平衡者","description":"寻找折中...","analysis":"避免极端选择。在选题中偏好多维权衡问题。"}};
+
+    const entries = Object.entries(data);
+    document.getElementById('total-count').textContent = entries.length;
+
+    const grid = document.getElementById('grid');
+    const overlay = document.getElementById('modal-overlay');
+    const modalClose = document.getElementById('modal-close');
+
+    function renderCards(list) {
+      grid.innerHTML = '';
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="no-result">没有找到匹配的人格类型</div>';
+        return;
+      }
+      list.forEach(([key, val]) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="card-tag">${key}</span>
+            <div class="card-titles">
+              <div class="card-name-zh">${val.name}</div>
+              <div class="card-desc">${val.description}</div>
+            </div>
+          </div>
+          <div class="card-analysis">${val.analysis}</div>
+        `;
+        card.addEventListener('click', () => openModal(key, val));
+        grid.appendChild(card);
+      });
+    }
+
+    function openModal(key, val) {
+      document.getElementById('m-tag').textContent = key;
+      document.getElementById('m-name').textContent = val.name;
+      document.getElementById('m-desc').textContent = val.description;
+      document.getElementById('m-analysis').textContent = val.analysis;
+      overlay.classList.add('open');
+    }
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+    modalClose.addEventListener('click', () => overlay.classList.remove('open'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') overlay.classList.remove('open');
+    });
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) { renderCards(entries); return; }
+      renderCards(entries.filter(([key, val]) =>
+        key.toLowerCase().includes(q) || val.name.includes(q) || val.description.includes(q)
+      ));
+    });
+
+    renderCards(entries);
+  </script>
+</body>
+</html>
