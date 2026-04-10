@@ -1,5 +1,8 @@
 const TYPES = ['BOSS','CTRL','GOGO','EXECUTOR','OH-NO','Dior-s','FAKE','OJBK','ANALYST','DETACHED','LOVE-R','ATM-er','MUM','THAN-K','SEXY','JOKE-R','MALO','WOC!','PERFORMER','ALARMIST','WHATEVER','CYNIC','MASKER','LOST','HUSTLER','PLAYER','DREAMER'] as const
 
+/** Types absent from the compatibility matrix (no source data). */
+export const TYPES_WITHOUT_COMPATIBILITY = ['FIXER'] as const
+
 // Raw matrix: rows = type A, columns = type B (same TYPES order)
 const RAW_MATRIX: number[][] = [
   // BOSS row:
@@ -58,6 +61,11 @@ const RAW_MATRIX: number[][] = [
   [60, 60, 83, 72, 85, 77, 66, 68, 70, 87, 85, 85, 74, 79, 75, 75, 85, 67, 84, 73, 73, 90, 83, 74, 88, 65, 85],
 ]
 
+/**
+ * Returns the averaged compatibility score between two SBTI types.
+ * Returns null if either type is not in the 27-type matrix
+ * (e.g., 'FIXER' which has no compatibility data in the source).
+ */
 export function getScore(typeA: string, typeB: string): number | null {
   const iA = TYPES.indexOf(typeA as typeof TYPES[number])
   const iB = TYPES.indexOf(typeB as typeof TYPES[number])

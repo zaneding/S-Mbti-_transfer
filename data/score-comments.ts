@@ -35,5 +35,11 @@ export const scoreLevels: ScoreLevel[] = [
 ]
 
 export function getScoreLevel(score: number): ScoreLevel {
-  return scoreLevels.find(l => score >= l.min && score <= l.max) ?? scoreLevels[scoreLevels.length - 1]
+  const level = scoreLevels.find(l => score >= l.min && score <= l.max)
+  if (!level) {
+    // Score should always be 40-90 from the matrix. Return lowest tier as safe fallback.
+    console.warn(`getScoreLevel: score ${score} is outside expected range 40-90`)
+    return scoreLevels[scoreLevels.length - 1]
+  }
+  return level
 }
