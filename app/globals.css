@@ -2,72 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global dark theme ── */
-html,
-body {
-  background-color: #070712;
-  color: #ffffff;
+/* ── Light theme ── */
+html, body {
+  background-color: #f0ecff;
+  color: #1e1b4b;
   min-height: 100%;
 }
+html { scroll-behavior: smooth; }
 
-html {
-  scroll-behavior: smooth;
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #f0ecff; }
+::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.25); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.45); }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: #070712;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.10);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.20);
-}
-
-/* ── Section enter animation ── */
+/* ── Animations ── */
 @keyframes fade-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 .section-animate-in {
   animation: fade-slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ── Type card stagger animation ── */
 @keyframes fade-in-card {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 .type-card-animate {
   opacity: 0;
   animation: fade-in-card 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ── Pulse animation ── */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.4; }
 }
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
 
-.animate-pulse {
-  animation: pulse 2s ease-in-out infinite;
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes ring-fill { from { stroke-dashoffset: 999; } }
+.animate-ring-fill { animation: ring-fill 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
